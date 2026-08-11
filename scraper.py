@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import os
 
-# Load the local, free NLP model (Zero API keys required)
+# Load the local NLP model
 nlp = spacy.load("en_core_web_sm")
 
 # Define skills to hunt for
@@ -26,19 +26,16 @@ def clean_html(raw_html):
 def extract_job_data(text, default_link=None, default_title=None):
     text_lower = text.lower()
     
-    # 1. Extract Application Method
     email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', text)
     application_method = default_link
     if email_match:
         application_method = email_match.group(0)
         
-    # 2. Extract Skills
     skills = []
     for skill in BIOINFO_SKILLS:
         if skill.strip(", ") in text_lower:
             skills.append(skill.strip(", ").title())
             
-    # 3. Extract Entities via local NLP
     doc = nlp(text)
     employer_name = None
     location = None
@@ -55,7 +52,6 @@ def extract_job_data(text, default_link=None, default_title=None):
     if locs:
         location = locs[0]
         
-    # 4. Infer Job Type
     job_type = "Unknown"
     if any(word in text_lower for word in ["phd", "postdoc", "university", "faculty", "lab"]):
         job_type = "Academia"
@@ -73,41 +69,26 @@ def extract_job_data(text, default_link=None, default_title=None):
     }
 
 def run_scraper():
-    # The Ultimate Token-Free Global Feed List
     rss_feeds = [
-        # --- MAJOR SCIENCE & PUBLISHING PORTALS ---
-        # Nature Careers - Filtered for Computational Biology & Bioinformatics
         "https://www.nature.com/naturecareers/jobs/rss?keywords=bioinformatics",
-        # Science Careers - AAAS Official Job Board
         "https://jobs.sciencecareers.org/jobs/bioinformatics/?format=rss",
-        
-        # --- GLOBAL RESEARCH & ACADEMIC NETWORKS ---
-        # EURAXESS - The European Commission's massive research database
         "https://euraxess.ec.europa.eu/jobs/search/feed/rss?keywords=bioinformatics",
-        # FindAPostDoc - UK/EU heavy, but globally used for postdocs
         "https://www.findapostdoc.com/rss/jobs.aspx?Keywords=bioinformatics",
-        "https://www.findapostdoc.com/rss/jobs.aspx?Keywords=computational%20biology",
-        # FindAPhD - For PhD candidates
         "https://www.findaphd.com/rss/phds.aspx?Keywords=bioinformatics",
-        
-        # --- BIOINFORMATICS SPECIFIC COMMUNITIES ---
-        # JobRxiv - The leading preprint server job board (highly used globally)
         "https://jobrxiv.org/job-category/bioinformatics/feed/",
-        # Bioinformatics.org - One of the oldest dedicated boards
         "https://www.bioinformatics.org/jobs/?format=rss",
-        
-        # --- THE COMPANY OF BIOLOGISTS (The Node) ---
-        # EvoDevo and genomics-heavy roles
         "https://thenode.biologists.com/jobs/feed/",
-        
-        # --- INFORMAL/SOCIAL HIRING ---
-        # Reddit - Where PIs and startups often post directly
         "https://www.reddit.com/r/bioinformatics/.rss"
     ]
     
-    # ... rest of the run_scraper() code remains exactly the same ...
-    
     jobs_db = []
+    
+    # STRICT HIRING PHRASES: We removed the word "job" from this list entirely 
+    # to prevent matching "bash job" or "VCF job".
+    hiring_phrases = [
+        "hiring", "open position", "vacancy", "looking for a postdoc", 
+        "seeking a", "we are expanding", "join our lab", "postdoc position"
+    ]
     
     for feed_url in rss_feeds:
         print(f"Fetching token-free jobs from {feed_url}...")
@@ -118,8 +99,10 @@ def run_scraper():
                 clean_text = clean_html(entry.get('description', '') + " " + entry.get('summary', ''))
                 full_text = entry.title + " " + clean_text
                 
-                if "reddit.com" in feed_url and not any(k in full_text.lower() for k in ["hiring", "job", "open position"]):
-                    continue
+                # Apply the strict filter to noisy feeds (Reddit & The Node)
+                is_noisy_feed = "reddit.com" in feed_url or "thenode" in feed_url
+                if is_noisy_feed and not any(phrase in full_text.lower() for phrase in hiring_phrases):
+                    continue # Skip this post, it's just a discussion
     
                 job_data = extract_job_data(
                     text=full_text, 
@@ -127,7 +110,6 @@ def run_scraper():
                     default_title=entry.title
                 )
                 
-                # Fallback to the RSS author tag if the NLP missed the employer name
                 if job_data["employer_name"] == "Unknown Employer" and hasattr(entry, 'author'):
                     job_data["employer_name"] = entry.author
                     
@@ -136,15 +118,11 @@ def run_scraper():
             print(f"Failed to fetch {feed_url}: {e}")
             continue
             
-    # Save the database
     os.makedirs('data', exist_ok=True)
     with open('data/jobs.json', 'w') as f:
         json.dump(jobs_db, f, indent=2)
         
     print(f"Successfully processed and saved {len(jobs_db)} token-free global jobs.")
-
-if __name__ == "__main__":
-    run_scraper()
 
 if __name__ == "__main__":
     run_scraper()
