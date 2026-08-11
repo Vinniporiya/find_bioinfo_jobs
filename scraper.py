@@ -100,6 +100,10 @@ def run_scraper():
             )
             jobs_db.append(job_data)
             
+    # Ensure the data directory exists before saving!
+    import os
+    os.makedirs('data', exist_ok=True)
+    
     # Save the structured data to your static database file
     with open('data/jobs.json', 'w') as f:
         json.dump(jobs_db, f, indent=2)
