@@ -17,7 +17,8 @@ jobs:
         uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.11'
-          cache: 'pip'
+          # CACHE LINE REMOVED
+        
 
       - name: Install Dependencies & spaCy Model
         run: |
