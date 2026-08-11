@@ -1,0 +1,36 @@
+name: NLP Job Scraper Pipeline
+
+on:
+  schedule:
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies & spaCy Model
+        run: |
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_sm
+          
+      - name: Run Scraper and Extract Jobs
+        # Notice we removed the API keys environment variables entirely
+        run: python scraper.py
+
+      - name: Commit and Push Data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/jobs.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update job data via local NLP scraper" && git push)
