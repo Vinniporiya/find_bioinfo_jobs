@@ -2,3 +2,4 @@ beautifulsoup4
 requests
 spacy==3.8.1
 feedparser
+click
