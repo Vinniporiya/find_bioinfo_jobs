@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bioinformatics & Computational Biology Jobs</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="h-full text-slate-800 flex flex-col font-sans">
+
+    <!-- Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg">
+                    <i data-lucide="dna" class="w-6 h-6"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-slate-900">BioComp <span class="text-indigo-600">Jobs</span></span>
+            </div>
+            <div class="flex items-center space-x-2 text-sm text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span id="update-time">Updated Daily</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero & Search Section -->
+    <section class="bg-gradient-to-b from-indigo-900 to-indigo-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center space-y-4">
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Find Your Next Computational Biology Role
+            </h1>
+            <p class="text-indigo-200 text-base sm:text-lg">
+                Automated global job aggregator for Bioinformatics, Genomics, and Structural Biology.
+            </p>
+
+            <!-- Search Inputs -->
+            <div class="pt-4 max-w-2xl mx-auto">
+                <div class="relative flex items-center">
+                    <i data-lucide="search" class="absolute left-4 w-5 h-5 text-slate-400"></i>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search by role, PI, university, or skill (e.g. Seurat, Python, Postdoc)..." 
+                        class="w-full pl-12 pr-4 py-3.5 rounded-xl text-slate-900 placeholder-slate-400 shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 text-sm sm:text-base"
+                    >
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        
+        <!-- Controls & Filters Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+            <!-- Sector Filter Buttons -->
+            <div class="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0" id="filter-buttons">
+                <button onclick="filterType('All')" class="filter-btn active px-4 py-2 rounded-lg text-sm font-semibold transition bg-indigo-600 text-white">
+                    All Jobs
+                </button>
+                <button onclick="filterType('Academia')" class="filter-btn px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+                    Academia & Labs
+                </button>
+                <button onclick="filterType('Industry')" class="filter-btn px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">
+                    Pharma & Biotech
+                </button>
+            </div>
+
+            <!-- Job Counter -->
+            <div class="text-sm text-slate-500 font-medium">
+                Showing <span id="job-count" class="font-bold text-slate-900">0</span> positions
+            </div>
+        </div>
+
+        <!-- Job Cards Container -->
+        <div id="job-container" class="space-y-4">
+            <!-- Loading Skeleton -->
+            <div class="animate-pulse bg-white p-6 rounded-xl border border-slate-200 space-y-3">
+                <div class="h-6 bg-slate-200 rounded w-1/3"></div>
+                <div class="h-4 bg-slate-200 rounded w-1/4"></div>
+                <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        <p>Built with GitHub Actions & Static NLP • Automatically refreshed every 12 hours</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let allJobs = [];
+        let activeType = 'All';
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Fetch job data from static JSON
+        fetch('data/jobs.json')
+            .then(res => res.json())
+            .then(data => {
+                allJobs = data;
+                renderJobs(allJobs);
+            })
+            .catch(err => {
+                console.error("Error loading job database:", err);
+                document.getElementById('job-container').innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-xl border border-slate-200">
+                        <i data-lucide="alert-circle" class="w-10 h-10 text-rose-500 mx-auto mb-2"></i>
+                        <p class="text-slate-700 font-medium">Unable to load job listings right now.</p>
+                        <p class="text-xs text-slate-400 mt-1">Make sure data/jobs.json exists in your repository.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            });
+
+        // Main render function
+        function renderJobs(jobsToRender) {
+            const container = document.getElementById('job-container');
+            document.getElementById('job-count').textContent = jobsToRender.length;
+
+            if (jobsToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-xl border border-slate-200">
+                        <i data-lucide="search-x" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+                        <h3 class="text-slate-800 font-semibold text-lg">No matching positions found</h3>
+                        <p class="text-slate-500 text-sm mt-1">Try clearing your search query or selecting a different filter.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = jobsToRender.map(job => {
+                // Determine format of Application Link/Email/DM
+                let applyHtml = '';
+                if (job.application_method) {
+                    if (job.application_method.includes('@')) {
+                        applyHtml = `<a href="mailto:${job.application_method}" class="inline-flex items-center space-x-1 text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                            <i data-lucide="mail" class="w-4 h-4"></i><span>Email Apply</span>
+                        </a>`;
+                    } else if (job.application_method.startsWith('http')) {
+                        applyHtml = `<a href="${job.application_method}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-semibold transition">
+                            <span>Apply Now</span><i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        </a>`;
+                    } else {
+                        applyHtml = `<span class="inline-flex items-center space-x-1 text-sm font-medium text-slate-500">
+                            <i data-lucide="message-square" class="w-4 h-4"></i><span>${job.application_method}</span>
+                        </span>`;
+                    }
+                } else {
+                    applyHtml = `<span class="text-xs text-slate-400">See original post</span>`;
+                }
+
+                // Sector badge color
+                const typeColor = job.job_type === 'Academia' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                                 job.job_type === 'Industry' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                                 'bg-slate-50 text-slate-600 border-slate-200';
+
+                // Skill tags
+                const skillTags = (job.skills || []).map(skill => 
+                    `<span class="bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-1 rounded-md border border-slate-200">${skill}</span>`
+                ).join('');
+
+                return `
+                    <div class="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 hover:border-slate-300 transition shadow-sm hover:shadow flex flex-col justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                            <div>
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded border ${typeColor}">
+                                        ${job.job_type || 'General'}
+                                    </span>
+                                    ${job.location ? `<span class="text-xs text-slate-500 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i>${job.location}</span>` : ''}
+                                </div>
+                                <h2 class="text-lg font-bold text-slate-900">${job.job_title || 'Bioinformatics Role'}</h2>
+                                <p class="text-sm font-medium text-slate-600 flex items-center gap-1.5 mt-0.5">
+                                    <i data-lucide="building-2" class="w-4 h-4 text-slate-400"></i>
+                                    ${job.employer_name || 'Academic Institution / Company'}
+                                </p>
+                            </div>
+                            <div class="sm:self-start">
+                                ${applyHtml}
+                            </div>
+                        </div>
+
+                        ${skillTags ? `<div class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100">${skillTags}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Live Search Handler
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            filterJobs();
+        });
+
+        // Filter by Sector (All / Academia / Industry)
+        function filterType(type) {
+            activeType = type;
+            
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = 'filter-btn px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-slate-600 hover:bg-slate-100 border border-slate-200';
+            });
+            event.target.className = 'filter-btn active px-4 py-2 rounded-lg text-sm font-semibold transition bg-indigo-600 text-white';
+
+            filterJobs();
+        }
+
+        // Combined Filter Function
+        function filterJobs() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+
+            const filtered = allJobs.filter(job => {
+                const matchesType = (activeType === 'All') || (job.job_type === activeType);
+                
+                const searchableText = [
+                    job.job_title, 
+                    job.employer_name, 
+                    job.location, 
+                    ...(job.skills || [])
+                ].join(' ').toLowerCase();
+
+                const matchesQuery = searchableText.includes(query);
+
+                return matchesType && matchesQuery;
+            });
+
+            renderJobs(filtered);
+        }
+    </script>
+</body>
+</html>
