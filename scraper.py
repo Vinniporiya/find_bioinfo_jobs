@@ -1,109 +1,110 @@
 import json
 import re
 import spacy
+import feedparser
+from bs4 import BeautifulSoup
 from datetime import datetime
 
-# Load spaCy's lightweight, free NLP model for entity recognition
+# Load the local NLP model
 nlp = spacy.load("en_core_web_sm")
 
-# Define a hardcoded list of relevant bioinformatics skills
+# Define skills to hunt for
 BIOINFO_SKILLS = [
     "python", " r ", " r,", "r/bioconductor", "seurat", "scanpy", 
     "nextflow", "snakemake", "crispr", "alphafold", "machine learning",
     "transcriptomics", "single-cell", "genomics", "bash", "linux"
 ]
 
-def extract_job_data(text):
+def clean_html(raw_html):
+    """Removes HTML tags from feed descriptions."""
+    if not raw_html:
+        return ""
+    soup = BeautifulSoup(raw_html, "html.parser")
+    return soup.get_text(separator=" ")
+
+def extract_job_data(text, default_link=None, default_title=None):
     text_lower = text.lower()
     
-    # 1. Filter: Ensure this is actually a job post
-    hiring_keywords = ["hiring", "looking for", "open position", "join our", "we are expanding"]
-    if not any(hk in text_lower for hk in hiring_keywords):
-        return None # Skip this post, it's not a job ad
-
-    # 2. Regex for Application Method (Email or URL)
+    # Extract Application Method
     email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', text)
-    url_match = re.search(r'https?://[^\s]+', text)
-    
-    application_method = None
+    application_method = default_link
     if email_match:
         application_method = email_match.group(0)
-    elif url_match:
-        application_method = url_match.group(0)
-    elif "dm " in text_lower or "message " in text_lower:
-        application_method = "Direct Message"
         
-    # 3. Skill Extraction via Keyword Matching
+    # Extract Skills
     skills = []
     for skill in BIOINFO_SKILLS:
         if skill.strip(", ") in text_lower:
             skills.append(skill.strip(", ").title())
             
-    # 4. Entity Extraction using spaCy (Organizations and Locations)
+    # Extract Entities via spaCy
     doc = nlp(text)
     employer_name = None
     location = None
     
-    # spaCy tags Organizations as 'ORG' and Locations as 'GPE' or 'LOC'
     orgs = [ent.text for ent in doc.ents if ent.label_ == "ORG"]
     locs = [ent.text for ent in doc.ents if ent.label_ in ["GPE", "LOC"]]
     
     if orgs:
-        employer_name = orgs[0] # Assume the first organization is the employer
-        
-    # Fallback regex for academic labs (e.g., "Chen Lab") since NER sometimes misses them
+        employer_name = orgs[0]
     if not employer_name:
          lab_match = re.search(r'([A-Z][a-z]+ Lab)', text)
          if lab_match:
              employer_name = lab_match.group(1)
-
     if locs:
         location = locs[0]
         
-    # 5. Infer Job Type based on keywords
+    # Infer Job Type
     job_type = "Unknown"
     if any(word in text_lower for word in ["phd", "postdoc", "university", "faculty", "lab"]):
         job_type = "Academia"
     elif any(word in text_lower for word in ["company", "startup", "industry", "inc", "ltd"]):
         job_type = "Industry"
-        
-    # 6. Extract Job Title using basic heuristic
-    title = None
-    common_titles = ["Postdoc", "Bioinformatician", "Data Scientist", "Computational Biology" ,"Computational Biologist", "PhD Student", "Software Engineer"]
-    for t in common_titles:
-        if t.lower() in text_lower:
-            title = t
-            break
 
     return {
-        "employer_name": employer_name,
-        "job_title": title,
+        "employer_name": employer_name or "Unknown Employer",
+        "job_title": default_title or "Bioinformatics Role",
         "job_type": job_type,
-        "location": location,
+        "location": location or "Remote/Unknown",
         "application_method": application_method,
         "skills": list(set(skills)),
         "extracted_at": datetime.now().isoformat()
     }
 
 def run_scraper():
-    # In a real scenario, you would fetch these from Twitter/Mastodon APIs
-    sample_posts = [
-        "So excited to announce the Chen Lab is expanding! We're looking for a driven Postdoc to lead our new spatial transcriptomics project. Must have strong R/Bioconductor experience and know Seurat. Based in Boston. DM me or send your CV to chen@university.edu!",
-        "I just published my first paper in Nature! #bioinformatics #transcriptomics"
+    # Live RSS feeds for bioinformatics jobs [1]
+    rss_feeds = [
+        "https://jobrxiv.org/job-category/bioinformatics/feed/",
+        "https://www.reddit.com/r/bioinformatics/.rss"
     ]
     
     jobs_db = []
     
-    for post in sample_posts:
-        job_data = extract_job_data(post)
-        if job_data:
+    for feed_url in rss_feeds:
+        print(f"Fetching jobs from {feed_url}...")
+        feed = feedparser.parse(feed_url)
+        
+        for entry in feed.entries:
+            # Combine the title and description for the NLP to read
+            clean_text = clean_html(entry.get('description', '') + " " + entry.get('summary', ''))
+            full_text = entry.title + " " + clean_text
+            
+            # Skip Reddit posts that aren't hiring
+            if "reddit.com" in feed_url and not any(k in full_text.lower() for k in ["hiring", "job", "open position"]):
+                continue
+
+            job_data = extract_job_data(
+                text=full_text, 
+                default_link=entry.link, 
+                default_title=entry.title
+            )
             jobs_db.append(job_data)
             
     # Save the structured data to your static database file
     with open('data/jobs.json', 'w') as f:
         json.dump(jobs_db, f, indent=2)
         
-    print(f"Successfully processed and saved {len(jobs_db)} jobs.")
+    print(f"Successfully processed and saved {len(jobs_db)} real jobs.")
 
 if __name__ == "__main__":
     run_scraper()
