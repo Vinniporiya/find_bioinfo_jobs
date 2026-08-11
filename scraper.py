@@ -6,6 +6,10 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import os
 
+# --- THE FIX: Add a custom User-Agent so websites don't block the scraper ---
+feedparser.USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 BioinformaticsAggregator/1.0"
+
+# ... rest of your script remains exactly the same ...
 # Load the local NLP model
 nlp = spacy.load("en_core_web_sm")
 
