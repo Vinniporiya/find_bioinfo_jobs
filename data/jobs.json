@@ -1,104 +1,25 @@
 [
   {
-    "employer_name": "Novartis",
-    "job_title": "Data Science & AI Innovation Postdoctoral Fellow",
-    "job_type": "Industry",
-    "location": "Cambridge, MA",
-    "application_method": "https://www.novartis.com/careers",
-    "skills": [
-      "Machine Learning",
-      "Transcriptomics",
-      "Python",
-      "Epigenomics",
-      "Computational Biology"
-    ],
-    "extracted_at": "2026-08-11T09:15:00.000000"
-  },
-  {
-    "employer_name": "Chen Lab",
-    "job_title": "Postdoctoral Researcher",
+    "employer_name": "FAQ",
+    "job_title": "2025 - Read This Before You Post to r/bioinformatics",
     "job_type": "Academia",
-    "location": "Boston, MA",
-    "application_method": "chen@university.edu",
+    "location": "Bioinformatics",
+    "application_method": "https://www.reddit.com/r/bioinformatics/comments/1hq1t6z/2025_read_this_before_you_post_to_rbioinformatics/",
     "skills": [
-      "Spatial Transcriptomics",
-      "R",
-      "Bioconductor",
-      "Seurat"
-    ],
-    "extracted_at": "2026-08-11T09:12:00.000000"
-  },
-  {
-    "employer_name": "Arc Institute",
-    "job_title": "Scientist, Computational Biology",
-    "job_type": "Industry",
-    "location": "Palo Alto, CA",
-    "application_method": "https://arcinstitute.org/careers",
-    "skills": [
-      "Machine Learning",
-      "Python",
-      "PyTorch",
-      "Structural Biology",
-      "AlphaFold"
-    ],
-    "extracted_at": "2026-08-11T08:45:00.000000"
-  },
-  {
-    "employer_name": "Amgen",
-    "job_title": "Senior Data Scientist Surfaceome Biology",
-    "job_type": "Industry",
-    "location": "Hyderabad, Telangana",
-    "application_method": "https://careers.amgen.com/",
-    "skills": [
-      "Machine Learning",
-      "Python",
-      "Proteomics",
-      "Single-Cell Multiomics",
-      "Generative Modeling"
-    ],
-    "extracted_at": "2026-08-10T14:30:00.000000"
-  },
-  {
-    "employer_name": "University of Copenhagen",
-    "job_title": "Postdoc in Computational Genomics",
-    "job_type": "Academia",
-    "location": "Copenhagen, Denmark",
-    "application_method": "https://employment.ku.dk/faculty",
-    "skills": [
-      "Genomics",
-      "Nextflow",
-      "Bash",
-      "Linux",
       "R"
     ],
-    "extracted_at": "2026-08-10T11:20:00.000000"
+    "extracted_at": "2026-08-11T11:57:23.528937"
   },
   {
-    "employer_name": "Gillani Lab - Dana-Farber Cancer Institute",
-    "job_title": "Computational Biologist",
-    "job_type": "Academia",
-    "location": "Boston, MA",
-    "application_method": "Direct Message",
+    "employer_name": "VCF",
+    "job_title": "How do you work with large VCF files without constantly babysitting your jobs ?",
+    "job_type": "Unknown",
+    "location": "Remote/Unknown",
+    "application_method": "https://www.reddit.com/r/bioinformatics/comments/1vjsc2l/how_do_you_work_with_large_vcf_files_without/",
     "skills": [
-      "Cancer Genomics",
-      "Python",
       "R",
-      "Scanpy"
+      "Bash"
     ],
-    "extracted_at": "2026-08-09T16:05:00.000000"
-  },
-  {
-    "employer_name": "Zifo",
-    "job_title": "Computational Biology & Bioinformatics Scientist",
-    "job_type": "Industry",
-    "location": "Chennai, Tamil Nadu",
-    "application_method": "https://zifornd.com/careers",
-    "skills": [
-      "Drug Discovery",
-      "Python",
-      "Data Curation",
-      "Bioinformatics"
-    ],
-    "extracted_at": "2026-08-09T10:15:00.000000"
+    "extracted_at": "2026-08-11T11:57:23.609492"
   }
 ]
