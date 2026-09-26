@@ -8,7 +8,7 @@
     "skills": [
       "R"
     ],
-    "extracted_at": "2026-09-26T03:12:58.484650"
+    "extracted_at": "2026-09-26T15:38:27.892956"
   },
   {
     "employer_name": "AI Addressing",
@@ -17,10 +17,10 @@
     "location": "AI",
     "application_method": "https://www.reddit.com/r/bioinformatics/comments/1wpm6er/you_are_not_replaceable_by_ai/",
     "skills": [
-      "Machine Learning",
+      "Genomics",
       "R",
-      "Genomics"
+      "Machine Learning"
     ],
-    "extracted_at": "2026-09-26T03:12:58.615560"
+    "extracted_at": "2026-09-26T15:38:28.028034"
   }
 ]
