@@ -8,18 +8,6 @@
     "skills": [
       "R"
     ],
-    "extracted_at": "2026-10-10T04:02:36.852792"
-  },
-  {
-    "employer_name": "ML",
-    "job_title": "Is learning ML during a postdoc actually worth it?",
-    "job_type": "Academia",
-    "location": "AI",
-    "application_method": "https://www.reddit.com/r/bioinformatics/comments/1x205xm/is_learning_ml_during_a_postdoc_actually_worth_it/",
-    "skills": [
-      "Python",
-      "R"
-    ],
-    "extracted_at": "2026-10-10T04:02:36.946921"
+    "extracted_at": "2026-10-10T16:52:07.864881"
   }
 ]
